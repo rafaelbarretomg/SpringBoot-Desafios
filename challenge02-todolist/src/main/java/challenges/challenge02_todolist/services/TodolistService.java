@@ -1,5 +1,4 @@
 package challenges.challenge02_todolist.services;
-import java.time.LocalDateTime;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -43,32 +42,24 @@ public class TodolistService {
             }
             return repository.save(toDoList);
         }catch(Exception e){
-            throw new RuntimeException("Erro ao inserir uma Tarefas", e);
+            throw new RuntimeException("Erro ao inserir uma tarefa", e);
         }
     }
 
     public void delete(Long id){
+        if(!repository.existsById(id)){
+            throw new RuntimeException("Tarefa nao encontrada");
+        }
         repository.deleteById(id);
     }
+    
 
     public Todolist update(Long id, Todolist todolist){
-        try{
-            Todolist entity = repository.getReferenceById(id);
-            updateData(entity, todolist);
-            return repository.save(entity);
-        }catch(Exception e){
-            throw new RuntimeException("Erro ao atualizar uma tarefa", e);
+        if(!repository.existsById(id)){
+            throw new RuntimeException("Tarefa nao encontrada");
         }
+        todolist.setId(id);
+        return repository.save(todolist);
     }
 
-    private void updateData(Todolist todoList, Todolist obj ){
-        todoList.setTitle(obj.getTitle());
-        todoList.setDescription(obj.getDescription());
-        todoList.setStatus(obj.getStatus());
-        todoList.getCreationDate();
-        if(todoList.getStatus() == TodoStatus.CONCLUIDA){
-            todoList.setConclusionDate(LocalDateTime.now());
-        }
-       
-    }
 }
