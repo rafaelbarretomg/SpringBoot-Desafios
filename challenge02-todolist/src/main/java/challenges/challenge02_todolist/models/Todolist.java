@@ -15,10 +15,11 @@ import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Size;
+import org.springframework.hateoas.RepresentationModel;
 
 @Entity
 @Table(name = "todolist")
-public class Todolist implements Serializable{
+public class Todolist extends RepresentationModel<Todolist> implements Serializable{
     private static final long serialVersionUID = 1L;
 
     @Id
