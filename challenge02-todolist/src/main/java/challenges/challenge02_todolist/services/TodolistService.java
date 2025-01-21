@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import challenges.challenge02_todolist.models.Todolist;
 import challenges.challenge02_todolist.models.enums.TodoStatus;
 import challenges.challenge02_todolist.repositories.TodolistRepository;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class TodolistService {

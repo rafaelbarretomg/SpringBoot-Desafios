@@ -1,4 +1,4 @@
-package  challenges.challenge02_todolist.models.enums;
+package challenges.challenge02_todolist.models.enums;
 
 public enum TodoStatus {
     PENDENTE,

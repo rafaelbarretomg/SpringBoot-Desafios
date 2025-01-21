@@ -5,7 +5,6 @@ import challenges.challenge02_todolist.models.enums.TodoStatus;
 import challenges.challenge02_todolist.services.TodolistService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,16 +17,15 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.time.LocalDateTime;
+import java.util.Arrays;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
-
-import java.time.LocalDateTime;
-import java.util.Arrays;
 
 
 @WebMvcTest(TodolistController.class)
@@ -40,7 +38,7 @@ public class TodolistControllerTest {
     private TodolistService service;
 
     @BeforeEach
-    void setUp(){
+    void setUp() {
         MockitoAnnotations.openMocks(this);
     }
 
@@ -88,16 +86,15 @@ public class TodolistControllerTest {
 
         when(service.insert(any(Todolist.class))).thenReturn(task);
 
-        // Executa a requisição e verifica os resultados
         mockMvc.perform(post("/tarefas")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
-                    {
-                        "title": "Tarefa 1",
-                        "description": "Descricao da tarefa 1",
-                        "status": "PENDENTE"
-                    }
-                    """))
+                                {
+                                    "title": "Tarefa 1",
+                                    "description": "Descricao da tarefa 1",
+                                    "status": "PENDENTE"
+                                }
+                                """))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id").value(1)) // Verifica o ID
                 .andExpect(jsonPath("$.title").value("Tarefa 1"))
@@ -113,7 +110,7 @@ public class TodolistControllerTest {
     void shouldUpdateTodolist() throws Exception {
         Todolist task = createTestTask(1L);
 
-        when(service.update(anyLong(),any(Todolist.class))).thenReturn(task);
+        when(service.update(anyLong(), any(Todolist.class))).thenReturn(task);
 
         mockMvc.perform(put("/tarefas/{id}", 1)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -134,7 +131,7 @@ public class TodolistControllerTest {
     }
 
     @Test
-    void shouldDeleteTodolist() throws Exception{
+    void shouldDeleteTodolist() throws Exception {
         Mockito.doNothing().when(service).delete(anyLong());
 
         mockMvc.perform(delete("/tarefas/{id}", 1))
