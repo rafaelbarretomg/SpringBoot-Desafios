@@ -58,7 +58,7 @@ public class TodolistControllerIntegrationTest {
     }
 
     @Test
-    void shouldReturnFindByIdTodolist() throws Exception{
+    void shouldReturnTodolistFindById() throws Exception{
         Todolist newTask = new Todolist(null, "Tarefa 1", "Descricao", TodoStatus.PENDENTE, null, null);
         Todolist savedTask = todolistRepository.save(newTask);
 

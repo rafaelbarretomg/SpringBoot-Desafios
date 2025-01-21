@@ -19,8 +19,13 @@ public class TodolistService {
     private TodolistRepository repository;
 
     public Page<Todolist> findAll(Pageable pageable){
-        Sort sort = Sort.by("title").ascending();
-        pageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort);
+        //Se o pageable nao for paginado, define uma pagina valida
+        if(pageable.isUnpaged()){
+            pageable = PageRequest.of(0, 10, Sort.by("title").ascending());
+        }else{
+            pageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Sort.by("title").ascending());
+        }
+
         return repository.findAll(pageable);
     }
 
