@@ -3,6 +3,7 @@ package challenges.challenge02_todolist.models;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.hibernate.annotations.CreationTimestamp;
 
 import challenges.challenge02_todolist.models.enums.TodoStatus;

@@ -58,8 +58,8 @@ public class TodolistController {
         if(result.hasErrors()){
             return ResponseEntity.badRequest().build();
         }
-        service.insert(toDoList);
-        return ResponseEntity.status(HttpStatus.CREATED).body(toDoList);
+        Todolist savedTask = service.insert(toDoList);
+        return ResponseEntity.status(HttpStatus.CREATED).body(savedTask);
     }
 
     @PutMapping(value = "/{id}")
@@ -67,8 +67,8 @@ public class TodolistController {
         if(result.hasErrors()){
             return ResponseEntity.badRequest().build();
         }
-        service.update(id, toDoList);
-        return ResponseEntity.status(HttpStatus.ACCEPTED).body(toDoList);
+        Todolist updatedTask = service.update(id, toDoList);
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body(updatedTask);
     }
 
     @DeleteMapping(value = "/{id}")
