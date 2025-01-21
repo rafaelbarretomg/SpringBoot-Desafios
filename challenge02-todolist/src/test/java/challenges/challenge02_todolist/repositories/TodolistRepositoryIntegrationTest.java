@@ -42,7 +42,7 @@ public class TodolistRepositoryIntegrationTest {
     }
 
     @Test
-    void shouldFindTodolistByStatus(){
+    void shouldReturnTasksByStatus(){
         Todolist newTask = new Todolist(null, "Tarefa 1", "Descricao", TodoStatus.CONCLUIDA, null, null);
         Todolist newTask2 = new Todolist(null, "Tarefa 3", "Descricao 3", TodoStatus.PENDENTE, null, null);
         todolistRepository.saveAll(Arrays.asList(newTask, newTask2));
@@ -59,7 +59,7 @@ public class TodolistRepositoryIntegrationTest {
     }
 
     @Test
-    void shouldFindByTitleContaining(){
+    void shouldFindTasksByPartialTitle(){
         Todolist newTask = new Todolist(null, "Tarefa 1", "Descricao", TodoStatus.CONCLUIDA, null, null);
         Todolist newTask2 = new Todolist(null, "Tarefa 3", "Descricao 3", TodoStatus.PENDENTE, null, null);
         todolistRepository.saveAll(Arrays.asList(newTask, newTask2));
@@ -71,6 +71,54 @@ public class TodolistRepositoryIntegrationTest {
         assertThat(tasks.getContent()).hasSize(2);
         assertThat(tasks.getContent().get(0).getTitle()).contains("Tarefa 1");
         assertThat(tasks.getContent().get(1).getDescription()).contains("Descricao 3");
+        assertThat(tasks.getContent().get(1).getStatus()).isEqualTo(TodoStatus.PENDENTE);
+        assertThat(tasks.getContent().get(0).getStatus()).isEqualTo(TodoStatus.CONCLUIDA);
 
+    }
+
+    @Test
+    void shouldReturnEmptyPageWhenNoTasksMatch(){
+        //Cenário: Banco está vazio
+        Pageable pageable = PageRequest.of(0, 10, Sort.by("title").ascending());
+
+
+        //Execucao: Busca por titulo inexistente
+        Page<Todolist> result = todolistRepository.findByTitleContaining("Inexistente", pageable);
+
+        //Verificaçao
+        assertThat(result).isNotNull();
+        assertThat(result.getContent()).isEmpty();
+    }
+
+    @Test
+    void shouldHandlePaginationcorrectly(){
+        //Cenário: Salva várias tarefas
+        for(int i = 1; i<=10; i++){
+            todolistRepository.save(new Todolist(null, "Tarefa " + i, "Descricao "+ i, TodoStatus.PENDENTE, null,null));
+        }
+
+        Pageable pageable = PageRequest.of(0, 5, Sort.by("title").ascending());
+
+        //Execução: Pagina 1 com 5 elementos por página
+        Page<Todolist> page = todolistRepository.findByStatus(TodoStatus.PENDENTE, pageable);
+
+
+
+        //Verificação
+        assertThat(page).isNotNull();
+        assertThat(page.getContent()).hasSize(5);
+        assertThat(page.getTotalPages()).isEqualTo(2);
+        assertThat(page.getTotalElements()).isEqualTo(10);
+        List<Todolist> allTasks = todolistRepository.findAll();
+        assertThat(allTasks).hasSize(10);
+        assertThat(page.getContent().get(0).getTitle()).isEqualTo("Tarefa 1");
+        assertThat(page.getContent().get(4).getTitle()).isEqualTo("Tarefa 4");
+
+    }
+
+    @Test
+    void shouldReturnEmptyOptionalForNonExistingId(){
+        Todolist task = todolistRepository.findById(999L).orElse(null);
+        assertThat(task).isNull();
     }
 }
