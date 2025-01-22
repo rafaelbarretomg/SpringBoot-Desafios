@@ -1,9 +1,12 @@
 package challenges.challenge02_todolist.controllers;
 
 
+import challenges.challenge02_todolist.dtos.TodolistRequest;
 import challenges.challenge02_todolist.models.Todolist;
 import challenges.challenge02_todolist.models.enums.TodoStatus;
 import challenges.challenge02_todolist.services.TodolistService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -22,6 +25,7 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @RestController
 @RequestMapping("/tarefas")
+@Tag(name = "Todolist", description = "Gerenciamente de Tarefas")
 public class TodolistController {
 
     @Autowired
@@ -49,29 +53,37 @@ public class TodolistController {
         return ResponseEntity.ok(model);
     }
 
+    @Operation(summary = "Cria uma nova tarefa", description = "Cria uma nova tarefa no sistema")
     @PostMapping
-    public ResponseEntity<EntityModel<Todolist>> insert(@RequestBody @Valid Todolist toDoList, BindingResult result) {
+    public ResponseEntity<Todolist> insert(@RequestBody @Valid TodolistRequest request, BindingResult result) {
         if (result.hasErrors()) {
             return ResponseEntity.badRequest().build();
         }
+        //convertendo DTO para entidade
+        Todolist toDoList = new Todolist();
+        toDoList.setTitle(request.getTitle());
+        toDoList.setDescription(request.getDescription());
+        toDoList.setStatus(request.getStatus());
+
         Todolist savedTask = service.insert(toDoList);
-        EntityModel<Todolist> model = EntityModel.of(savedTask);
-        model.add(linkTo(methodOn(TodolistController.class).findById(savedTask.getId())).withSelfRel());
-        model.add(linkTo(methodOn(TodolistController.class).findAll(Pageable.unpaged())).withSelfRel());
-        return ResponseEntity.status(HttpStatus.CREATED).body(model);
+        return ResponseEntity.status(HttpStatus.CREATED).body(savedTask);
     }
 
+    @Operation(summary = "Atualiza uma tarefa existente", description = "Atualiza os detalhes de uma tarefa")
     @PutMapping(value = "/{id}")
-    public ResponseEntity<EntityModel<Todolist>> update(@PathVariable Long id, @RequestBody @Valid Todolist toDoList, BindingResult result) {
+    public ResponseEntity<Todolist> update(@PathVariable Long id, @RequestBody @Valid TodolistRequest request, BindingResult result) {
         if (result.hasErrors()) {
             return ResponseEntity.badRequest().build();
         }
-        Todolist updatedTask = service.update(id, toDoList);
-        EntityModel<Todolist> model = EntityModel.of(updatedTask);
-        model.add(linkTo(methodOn(TodolistController.class).findById(updatedTask.getId())).withSelfRel());
-        model.add(linkTo(methodOn(TodolistController.class).findAll(Pageable.unpaged())).withSelfRel());
 
-        return ResponseEntity.status(HttpStatus.ACCEPTED).body(model);
+        //Convertendo DTO para entidade
+        Todolist toDoList = new Todolist();
+        toDoList.setTitle(request.getTitle());
+        toDoList.setDescription(request.getDescription());
+        toDoList.setStatus(request.getStatus());
+
+        Todolist updatedTask = service.update(id, toDoList);
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body(updatedTask);
     }
 
     @DeleteMapping(value = "/{id}")

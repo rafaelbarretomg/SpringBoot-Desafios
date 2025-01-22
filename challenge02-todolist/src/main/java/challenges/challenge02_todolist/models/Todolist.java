@@ -25,10 +25,7 @@ public class Todolist extends RepresentationModel<Todolist> implements Serializa
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    
-    @NotEmpty(message = "Titulo é obrigatório")
-    @NotBlank(message = "Titulo nao pode conter apenas espaçoes!")
-    @Size(min = 3, max = 100, message = "Titulo deve ter entre 3 e 100 caracteres")
+
     private String title;
 
     private String description;
@@ -40,7 +37,7 @@ public class Todolist extends RepresentationModel<Todolist> implements Serializa
 
     private LocalDateTime conclusionDate;
 
-    Todolist(){}
+    public Todolist(){}
 
     public Todolist(Long id,
             @NotEmpty(message = "Titulo é obrigatório") @NotBlank(message = "Titulo nao pode conter apenas espaçoes!") @Size(min = 3, max = 100, message = "Titulo deve ter entre 3 e 100 caracteres") String title,

@@ -49,6 +49,9 @@ public class TodolistServiceIntegrationTest {
 
         assertThat(allTasks).hasSize(2);
         assertThat(allTasks).extracting(Todolist::getTitle).contains("Tarefa 1", "Tarefa 2");
+        //expressao acima Todolist::getTitle equivale a essa abaixo
+        //assertThat(allTasks).extracting(todolist -> todolist.getTitle()).contains("Tarefa 1", "Tarefa 2");
+
 
     }
 
