@@ -19,6 +19,8 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.swing.text.html.parser.Entity;
 
+import java.util.List;
+
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
@@ -31,26 +33,18 @@ public class TodolistController {
     @Autowired
     private TodolistService service;
 
+    @Operation(summary = "Endpoint findAll com paginação")
     @GetMapping
-    public ResponseEntity<Page<EntityModel<Todolist>>> findAll(Pageable pageable) {
-        Page<Todolist> tasks = service.findAll(pageable);
-        Page<EntityModel<Todolist>> tasksWithLinks = tasks.map(task ->{
-            EntityModel<Todolist> model = EntityModel.of(task);
-            model.add(linkTo(methodOn(TodolistController.class).findById(task.getId())).withSelfRel());
-            model.add(linkTo(methodOn(TodolistController.class).findAll(pageable)).withSelfRel());
-            return model;
-        });
-
-        return ResponseEntity.ok(tasksWithLinks);
+    public ResponseEntity<List<Todolist>> findAll() {
+            List<Todolist> tasks = service.findAll();
+            return ResponseEntity.ok(tasks);
     }
 
+    @Operation(summary = "Endpoint findById")
     @GetMapping("/{id}")
-    public ResponseEntity<EntityModel<Todolist>> findById(@PathVariable Long id) {
+    public ResponseEntity<Todolist> findById(@PathVariable Long id) {
         Todolist task = service.findById(id);
-        EntityModel<Todolist> model = EntityModel.of(task);
-        model.add(linkTo(methodOn(TodolistController.class).findById(task.getId())).withSelfRel());
-        model.add(linkTo(methodOn(TodolistController.class).findAll(Pageable.unpaged())).withSelfRel());
-        return ResponseEntity.ok(model);
+        return ResponseEntity.ok(task);
     }
 
     @Operation(summary = "Cria uma nova tarefa", description = "Cria uma nova tarefa no sistema")
@@ -86,34 +80,25 @@ public class TodolistController {
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(updatedTask);
     }
 
+    @Operation(summary = "Endpoint Delete")
     @DeleteMapping(value = "/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         service.delete(id);
         return ResponseEntity.noContent().build();
     }
 
+    @Operation(summary = "Endpoint de busca com paginação")
     @GetMapping("/busca")
-    public ResponseEntity<Page<EntityModel<Todolist>>> findByTitle(@RequestParam String title, Pageable pageable) {
-        Page<Todolist> tasks = service.findByTitle(title, pageable);
-        Page<EntityModel<Todolist>> tasksWithLinks = tasks.map(task ->{
-            EntityModel<Todolist> model = EntityModel.of(task);
-            model.add(linkTo(methodOn(TodolistController.class).findById(task.getId())).withSelfRel());
-            model.add(linkTo(methodOn(TodolistController.class).findAll(pageable)).withSelfRel());
-            return model;
-        });
-        return ResponseEntity.ok(tasksWithLinks);
+    public ResponseEntity<List<Todolist>> findByTitle(@RequestParam String title) {
+       List<Todolist> tasks = service.findByTitle(title);
+        return ResponseEntity.ok(tasks);
     }
 
+    @Operation(summary = "Endpoint busca por status com paginação")
     @GetMapping("/status")
-    public ResponseEntity<Page<EntityModel<Todolist>>> findByStatus(@RequestParam TodoStatus status, Pageable pageable) {
-        Page<Todolist> tasks = service.findByStatus(status, pageable);
-        Page<EntityModel<Todolist>> tasksWithLinks = tasks.map(task ->{
-            EntityModel<Todolist> model = EntityModel.of(task);
-            model.add(linkTo(methodOn(TodolistController.class).findById(task.getId())).withSelfRel());
-            model.add(linkTo(methodOn(TodolistController.class).findAll(pageable)).withSelfRel());
-            return model;
-        });
-        return ResponseEntity.ok(tasksWithLinks);
+    public ResponseEntity<List<Todolist>> findByStatus(@RequestParam TodoStatus status) {
+       List<Todolist> tasks = service.findByStatus(status);
+        return ResponseEntity.ok(tasks);
     }
 
 

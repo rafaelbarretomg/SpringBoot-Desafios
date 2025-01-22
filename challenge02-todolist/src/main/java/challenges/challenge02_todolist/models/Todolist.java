@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import org.hibernate.annotations.CreationTimestamp;
 
 import challenges.challenge02_todolist.models.enums.TodoStatus;
@@ -17,6 +18,7 @@ import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Size;
 import org.springframework.hateoas.RepresentationModel;
 
+@Schema(description = "Todolist")
 @Entity
 @Table(name = "todolist")
 public class Todolist extends RepresentationModel<Todolist> implements Serializable{

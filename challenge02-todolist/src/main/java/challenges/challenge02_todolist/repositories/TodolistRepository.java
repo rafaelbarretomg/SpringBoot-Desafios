@@ -7,12 +7,12 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import  challenges.challenge02_todolist.models.Todolist;
 import challenges.challenge02_todolist.models.enums.TodoStatus;
 
-
+import java.util.List;
 
 
 public interface TodolistRepository extends JpaRepository<Todolist, Long>{
     
-    Page<Todolist> findByTitleContaining(String title, Pageable pageable);
-    Page<Todolist> findByStatus(TodoStatus status, Pageable pageable);
+    List<Todolist> findByTitleContaining(String title);
+    List<Todolist> findByStatus(TodoStatus status);
     
 }

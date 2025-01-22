@@ -1,6 +1,7 @@
 package challenges.challenge02_todolist.dtos;
 
 import challenges.challenge02_todolist.models.enums.TodoStatus;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
@@ -9,6 +10,7 @@ import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 
+@Schema(description = "TodoListRequest")
 public class TodolistRequest {
 
     @NotEmpty(message = "Titulo é obrigatório")

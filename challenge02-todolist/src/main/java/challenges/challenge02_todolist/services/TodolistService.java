@@ -1,16 +1,20 @@
 package challenges.challenge02_todolist.services;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.stereotype.Service;
-
+import challenges.challenge02_todolist.controllers.TodolistController;
 import challenges.challenge02_todolist.models.Todolist;
 import challenges.challenge02_todolist.models.enums.TodoStatus;
 import challenges.challenge02_todolist.repositories.TodolistRepository;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.hateoas.PagedModel;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @Service
 public class TodolistService {
@@ -18,23 +22,23 @@ public class TodolistService {
     @Autowired
     private TodolistRepository repository;
 
-    public Page<Todolist> findAll(Pageable pageable){
-        //Se o pageable nao for paginado, define uma pagina valida
-        if(pageable.isUnpaged()){
-            pageable = PageRequest.of(0, 10, Sort.by("title").ascending());
-        }else{
-            pageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Sort.by("title").ascending());
-        }
+    public List<Todolist> findAll(){
+        List<Todolist> tasks = repository.findAll();
 
-        return repository.findAll(pageable);
+        tasks.forEach(t -> t.add(linkTo(methodOn(TodolistController.class).findById(t.getId())).withSelfRel()));
+        return tasks;
     }
 
-    public Page<Todolist> findByTitle(String title, Pageable pageable){
-        return repository.findByTitleContaining(title, pageable);
+    public List<Todolist> findByTitle(String title){
+        List<Todolist> tasks =  repository.findByTitleContaining(title);
+        tasks.forEach(t -> t.add(linkTo(methodOn(TodolistController.class).findById(t.getId())).withSelfRel()));
+        return tasks;
     }
 
-    public Page<Todolist> findByStatus(TodoStatus status, Pageable pageable){
-        return repository.findByStatus(status, pageable);
+    public List<Todolist> findByStatus(TodoStatus status  ){
+        List<Todolist> tasks =  repository.findByStatus(status);
+        tasks.forEach(t -> t.add(linkTo(methodOn(TodolistController.class).findById(t.getId())).withSelfRel()));
+        return tasks;
     }
 
     public Todolist findById(Long id){
