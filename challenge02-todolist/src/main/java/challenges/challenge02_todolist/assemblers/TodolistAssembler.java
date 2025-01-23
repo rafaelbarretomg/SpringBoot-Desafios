@@ -5,6 +5,7 @@ import challenges.challenge02_todolist.models.Todolist;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.hateoas.Link;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport;
 import org.springframework.stereotype.Component;
@@ -25,6 +26,21 @@ public class TodolistAssembler extends RepresentationModelAssemblerSupport<Todol
         return entity;
     }
 
+    public String getLink(Page<Todolist> page, Pageable pageable){
+        StringBuilder sortParams = new StringBuilder();
+        page.getSort().forEach(order -> {
+            if (sortParams.length() > 0) sortParams.append("&");
+            sortParams.append("sort=").append(order.getProperty()).append(",").append(order.getDirection());
+        });
+
+        String link = linkTo(methodOn(TodolistController.class).findAll(null)).toUri().toString()
+                + "?page=" + pageable.getPageNumber()
+                + "&size=" + pageable.getPageSize()
+                + "&" + sortParams;
+
+        return link;
+    }
+
     public PagedModel<Todolist> toPagedModel(Page<Todolist> page) {
         //Converte o conteudo da pagina em uma lista de recursos com links
         PagedModel.PageMetadata metadata = new PagedModel.PageMetadata(
@@ -34,28 +50,29 @@ public class TodolistAssembler extends RepresentationModelAssemblerSupport<Todol
                 page.getTotalPages()
         );
 
+
         PagedModel<Todolist> pagedModel = PagedModel.of(
                 page.getContent().stream().map(this::toModel).toList(),
                 metadata
         );
         // Link para a página atual
-        pagedModel.add(linkTo(methodOn(TodolistController.class).findAll(PageRequest.of(page.getNumber(), page.getSize()))).withSelfRel());
+        pagedModel.add(Link.of(getLink(page,page.getPageable())).withSelfRel());
 
         // Link para a primeira página
-        pagedModel.add(linkTo(methodOn(TodolistController.class).findAll(PageRequest.of(0, page.getSize()))).withRel("first"));
+        pagedModel.add(Link.of(getLink(page,page.getPageable().first())).withRel("first"));
 
         // Link para a próxima página (se existir)
         if (page.hasNext()) {
-            pagedModel.add(linkTo(methodOn(TodolistController.class).findAll(page.nextPageable())).withRel("next"));
+            pagedModel.add(Link.of(getLink(page,page.nextPageable())).withRel("next"));
         }
 
         // Link para a página anterior (se existir)
         if (page.hasPrevious()) {
-            pagedModel.add(linkTo(methodOn(TodolistController.class).findAll(page.previousPageable())).withRel("prev"));
+            pagedModel.add(Link.of(getLink(page,page.previousPageable())).withRel("previous"));
         }
 
         // Link para a última página
-        pagedModel.add(linkTo(methodOn(TodolistController.class).findAll(PageRequest.of(page.getTotalPages() - 1, page.getSize()))).withRel("last"));
+        pagedModel.add(Link.of(getLink(page,PageRequest.of(page.getTotalPages() -1, page.getPageable().getPageSize()))).withRel("last"));
 
         return pagedModel;
 
