@@ -5,10 +5,15 @@ import challenges.challenge02_todolist.models.Todolist;
 import challenges.challenge02_todolist.models.enums.TodoStatus;
 import challenges.challenge02_todolist.services.TodolistService;
 import jakarta.validation.Valid;
+import org.apache.coyote.Response;
+import org.hibernate.query.SortDirection;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.PagedModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
@@ -28,24 +33,51 @@ public class TodolistController {
     private TodolistService service;
 
     @GetMapping
-    public ResponseEntity<Page<EntityModel<Todolist>>> findAll(Pageable pageable) {
-        Page<Todolist> tasks = service.findAll(pageable);
-        Page<EntityModel<Todolist>> tasksWithLinks = tasks.map(task ->{
-            EntityModel<Todolist> model = EntityModel.of(task);
-            model.add(linkTo(methodOn(TodolistController.class).findById(task.getId())).withSelfRel());
-            model.add(linkTo(methodOn(TodolistController.class).findAll(pageable)).withSelfRel());
-            return model;
-        });
+    public ResponseEntity<PagedModel<EntityModel<Todolist>>> findAll(
+            @RequestParam(value = "page", defaultValue = "0") Integer page,
+            @RequestParam(value = "size", defaultValue = "5") Integer size,
+            @RequestParam(value = "direction", defaultValue = "asc") String direction
+    ) {
+        var sortDirection = "desc".equalsIgnoreCase(direction) ? Sort.Direction.DESC: Sort.Direction.ASC;
+        Pageable pageable = PageRequest.of(page, size, Sort.by(sortDirection, "id"));
+        return ResponseEntity.ok(service.findAll(pageable));
 
-        return ResponseEntity.ok(tasksWithLinks);
     }
+
+
+    @GetMapping("/busca")
+    public ResponseEntity<PagedModel<EntityModel<Todolist>>> findByTitle(
+            @RequestParam(value = "title") String title,
+            @RequestParam(value = "page", defaultValue = "0") Integer page,
+            @RequestParam(value = "size", defaultValue = "5") Integer size,
+            @RequestParam(value = "direction", defaultValue = "asc") String direction
+
+    ) {
+        var sortDirection = "desc".equalsIgnoreCase(direction) ? Sort.Direction.DESC: Sort.Direction.ASC;
+        Pageable pageable = PageRequest.of(page, size, Sort.by(sortDirection, "id"));
+
+        return ResponseEntity.ok(service.findByTitle(title,pageable));
+    }
+
+    @GetMapping("/status")
+    public ResponseEntity<PagedModel<EntityModel<Todolist>>> findByStatus(
+            @RequestParam(value = "status") TodoStatus status,
+            @RequestParam(value = "page", defaultValue = "0") Integer page,
+            @RequestParam(value = "size", defaultValue = "5") Integer size,
+            @RequestParam(value = "direction", defaultValue = "asc") String direction
+    ) {
+        var sortDirection = "desc".equalsIgnoreCase(direction) ? Sort.Direction.DESC: Sort.Direction.ASC;
+        Pageable pageable = PageRequest.of(page, size, Sort.by(sortDirection, "id"));
+
+        return ResponseEntity.ok(service.findByStatus(status,pageable));
+    }
+
 
     @GetMapping("/{id}")
     public ResponseEntity<EntityModel<Todolist>> findById(@PathVariable Long id) {
         Todolist task = service.findById(id);
         EntityModel<Todolist> model = EntityModel.of(task);
         model.add(linkTo(methodOn(TodolistController.class).findById(task.getId())).withSelfRel());
-        model.add(linkTo(methodOn(TodolistController.class).findAll(Pageable.unpaged())).withSelfRel());
         return ResponseEntity.ok(model);
     }
 
@@ -57,7 +89,6 @@ public class TodolistController {
         Todolist savedTask = service.insert(toDoList);
         EntityModel<Todolist> model = EntityModel.of(savedTask);
         model.add(linkTo(methodOn(TodolistController.class).findById(savedTask.getId())).withSelfRel());
-        model.add(linkTo(methodOn(TodolistController.class).findAll(Pageable.unpaged())).withSelfRel());
         return ResponseEntity.status(HttpStatus.CREATED).body(model);
     }
 
@@ -69,7 +100,6 @@ public class TodolistController {
         Todolist updatedTask = service.update(id, toDoList);
         EntityModel<Todolist> model = EntityModel.of(updatedTask);
         model.add(linkTo(methodOn(TodolistController.class).findById(updatedTask.getId())).withSelfRel());
-        model.add(linkTo(methodOn(TodolistController.class).findAll(Pageable.unpaged())).withSelfRel());
 
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(model);
     }
@@ -78,30 +108,6 @@ public class TodolistController {
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         service.delete(id);
         return ResponseEntity.noContent().build();
-    }
-
-    @GetMapping("/busca")
-    public ResponseEntity<Page<EntityModel<Todolist>>> findByTitle(@RequestParam String title, Pageable pageable) {
-        Page<Todolist> tasks = service.findByTitle(title, pageable);
-        Page<EntityModel<Todolist>> tasksWithLinks = tasks.map(task ->{
-            EntityModel<Todolist> model = EntityModel.of(task);
-            model.add(linkTo(methodOn(TodolistController.class).findById(task.getId())).withSelfRel());
-            model.add(linkTo(methodOn(TodolistController.class).findAll(pageable)).withSelfRel());
-            return model;
-        });
-        return ResponseEntity.ok(tasksWithLinks);
-    }
-
-    @GetMapping("/status")
-    public ResponseEntity<Page<EntityModel<Todolist>>> findByStatus(@RequestParam TodoStatus status, Pageable pageable) {
-        Page<Todolist> tasks = service.findByStatus(status, pageable);
-        Page<EntityModel<Todolist>> tasksWithLinks = tasks.map(task ->{
-            EntityModel<Todolist> model = EntityModel.of(task);
-            model.add(linkTo(methodOn(TodolistController.class).findById(task.getId())).withSelfRel());
-            model.add(linkTo(methodOn(TodolistController.class).findAll(pageable)).withSelfRel());
-            return model;
-        });
-        return ResponseEntity.ok(tasksWithLinks);
     }
 
 
