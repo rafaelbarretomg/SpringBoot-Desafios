@@ -1,10 +1,12 @@
 package challenges.challenge02_todolist.services;
 
+import challenges.challenge02_todolist.assemblers.TodolistAssembler;
 import challenges.challenge02_todolist.controllers.TodolistController;
 import challenges.challenge02_todolist.models.Todolist;
 import challenges.challenge02_todolist.models.enums.TodoStatus;
 import challenges.challenge02_todolist.repositories.TodolistRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -22,23 +24,27 @@ public class TodolistService {
     @Autowired
     private TodolistRepository repository;
 
-    public List<Todolist> findAll(){
-        List<Todolist> tasks = repository.findAll();
+    @Autowired
+    private TodolistAssembler todolistAssembler;
 
-        tasks.forEach(t -> t.add(linkTo(methodOn(TodolistController.class).findById(t.getId())).withSelfRel()));
-        return tasks;
+    public PagedModel<Todolist> findAll(Pageable pageable){
+        if(pageable == null){
+            pageable = PageRequest.of(0, 10, Sort.by("title").ascending());
+        }
+        Page<Todolist> page = repository.findAll(pageable);
+
+        //Converte o page<Todolist> para PagedModel<Todolist>
+        return todolistAssembler.toPagedModel(page);
     }
 
-    public List<Todolist> findByTitle(String title){
-        List<Todolist> tasks =  repository.findByTitleContaining(title);
-        tasks.forEach(t -> t.add(linkTo(methodOn(TodolistController.class).findById(t.getId())).withSelfRel()));
-        return tasks;
+    public PagedModel<Todolist> findByTitle(String title, Pageable pageable){
+        Page<Todolist> page =  repository.findByTitleContaining(title, pageable);
+        return todolistAssembler.toPagedModel(page);
     }
 
-    public List<Todolist> findByStatus(TodoStatus status  ){
-        List<Todolist> tasks =  repository.findByStatus(status);
-        tasks.forEach(t -> t.add(linkTo(methodOn(TodolistController.class).findById(t.getId())).withSelfRel()));
-        return tasks;
+    public PagedModel<Todolist> findByStatus(TodoStatus status, Pageable pageable ){
+        Page<Todolist> page =  repository.findByStatus(status, pageable);
+        return todolistAssembler.toPagedModel(page);
     }
 
     public Todolist findById(Long id){

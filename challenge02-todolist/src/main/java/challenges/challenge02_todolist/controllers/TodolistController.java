@@ -10,8 +10,11 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.PagedModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
@@ -35,9 +38,27 @@ public class TodolistController {
 
     @Operation(summary = "Endpoint findAll com paginação")
     @GetMapping
-    public ResponseEntity<List<Todolist>> findAll() {
-            List<Todolist> tasks = service.findAll();
+    public ResponseEntity<PagedModel<Todolist>> findAll() {
+
+        Pageable pageable = PageRequest.of(0, 10, Sort.by("title").ascending());
+            PagedModel<Todolist> tasks = service.findAll(pageable);
             return ResponseEntity.ok(tasks);
+    }
+
+    @Operation(summary = "Endpoint de busca com paginação")
+    @GetMapping("/busca")
+    public ResponseEntity<PagedModel<Todolist>> findByTitle(@RequestParam String title) {
+        Pageable pageable = PageRequest.of(0, 10, Sort.by("title").ascending());
+        PagedModel<Todolist> page = service.findByTitle(title, pageable);
+        return ResponseEntity.ok(page);
+    }
+
+    @Operation(summary = "Endpoint busca por status com paginação")
+    @GetMapping("/status")
+    public ResponseEntity<PagedModel<Todolist>> findByStatus(@RequestParam TodoStatus status) {
+        Pageable pageable = PageRequest.of(0, 10, Sort.by("title").ascending());
+        PagedModel<Todolist> page = service.findByStatus(status, pageable);
+        return ResponseEntity.ok(page);
     }
 
     @Operation(summary = "Endpoint findById")
@@ -86,20 +107,5 @@ public class TodolistController {
         service.delete(id);
         return ResponseEntity.noContent().build();
     }
-
-    @Operation(summary = "Endpoint de busca com paginação")
-    @GetMapping("/busca")
-    public ResponseEntity<List<Todolist>> findByTitle(@RequestParam String title) {
-       List<Todolist> tasks = service.findByTitle(title);
-        return ResponseEntity.ok(tasks);
-    }
-
-    @Operation(summary = "Endpoint busca por status com paginação")
-    @GetMapping("/status")
-    public ResponseEntity<List<Todolist>> findByStatus(@RequestParam TodoStatus status) {
-       List<Todolist> tasks = service.findByStatus(status);
-        return ResponseEntity.ok(tasks);
-    }
-
 
 }
