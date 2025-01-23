@@ -35,7 +35,7 @@ public class TodolistAssembler extends RepresentationModelAssemblerSupport<Todol
                         page.getTotalElements(),
                         page.getTotalPages()
                 ),
-                linkTo(methodOn(TodolistController.class).findAll()).withSelfRel()
+                linkTo(methodOn(TodolistController.class).findAll(PageRequest.of(0, page.getSize()))).withSelfRel()
         );
     }
 

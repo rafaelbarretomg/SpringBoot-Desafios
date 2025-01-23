@@ -1,4 +1,4 @@
-package challenges.challenge02_todolist.dtos;
+package challenges.challenge02_todolist.models.dtos;
 
 import challenges.challenge02_todolist.models.enums.TodoStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
