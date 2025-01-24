@@ -9,16 +9,15 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.PagedModel;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDateTime;
-import java.util.Arrays;
+import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -55,17 +54,27 @@ public class TodolistControllerTest {
 
     @Test
     void shouldReturnAllTodoLists() throws Exception {
-        Pageable pageable = PageRequest.of(0, 5);
-        Page<Todolist> tasks = new PageImpl<>(Arrays.asList(createTestTask(1L), createTestTask(2L)));
-        when(service.findAll(pageable)).thenReturn(tasks);
+        // Criando um PagedModel fictício
+        PagedModel<EntityModel<Todolist>> mockPagedModel = PagedModel.of(
+                List.of(
+                        EntityModel.of(createTestTask(1L)),
+                        EntityModel.of(createTestTask(2L))
+                ),
+                new PagedModel.PageMetadata(10, 0, 2)
+        );
 
+        // Mockando o comportamento do serviço
+        when(service.findAll(any(Pageable.class))).thenReturn(mockPagedModel);
+
+        // Realizando a requisição ao controlador e verificando o resultado
         mockMvc.perform(get("/tarefas")
                         .param("page", "0")
                         .param("size", "5"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content[0].id").value(1))
-                .andExpect(jsonPath("$.content[1].id").value(2));
+                .andExpect(jsonPath("$._embedded.todolistList[0].id").value(1))
+                .andExpect(jsonPath("$._embedded.todolistList[1].id").value(2));
     }
+
 
     @Test
     void shouldReturnTodolistById() throws Exception {

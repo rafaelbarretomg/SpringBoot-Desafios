@@ -12,8 +12,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.time.LocalDateTime;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -53,12 +51,13 @@ public class TodolistControllerIntegrationTest {
         mockMvc.perform(get("/tarefas")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())// O status deve ser 200 OK
-                .andExpect(jsonPath("$.content.length()").value(2)); // verifica se retorna 2 tarefas
+                .andExpect(jsonPath("$._embedded.todolistList[0].title").value("Tarefa 1"))
+                .andExpect(jsonPath("$._embedded.todolistList[1].title").value("Tarefa 2"));
 
     }
 
     @Test
-    void shouldReturnTodolistFindById() throws Exception{
+    void shouldReturnTodolistFindById() throws Exception {
         Todolist newTask = new Todolist(null, "Tarefa 1", "Descricao", TodoStatus.PENDENTE, null, null);
         Todolist savedTask = todolistRepository.save(newTask);
 

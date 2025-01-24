@@ -2,20 +2,17 @@ package challenges.challenge02_todolist.repositories;
 
 import challenges.challenge02_todolist.models.Todolist;
 import challenges.challenge02_todolist.models.enums.TodoStatus;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.data.domain.*;
 
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.assertj.core.api.Assertions.assertThat;
 
 @ExtendWith(MockitoExtension.class)
 public class TodolistRepositoryTest {
@@ -25,7 +22,7 @@ public class TodolistRepositoryTest {
 
 
     @Test
-    void shouldFindTasksByPartialTitle(){
+    void shouldFindTasksByPartialTitle() {
         //Mock de dados
         List<Todolist> mockTasks = List.of(new Todolist(1L, "Comprar pao", "Ir a padaria", TodoStatus.PENDENTE, null, null));
         Pageable pageable = PageRequest.of(0, 10, Sort.by("title").ascending());
@@ -47,7 +44,7 @@ public class TodolistRepositoryTest {
     }
 
     @Test
-    void shouldReturnTasksByStatus(){
+    void shouldReturnTasksByStatus() {
         //Mock de dados
         List<Todolist> mockTasks = List.of(new Todolist(1L, "Comprar pao", "Ir a padaria", TodoStatus.PENDENTE, null, null));
         Pageable pageable = PageRequest.of(0, 10, Sort.by("title").ascending());
@@ -70,7 +67,7 @@ public class TodolistRepositoryTest {
     }
 
     @Test
-    void shouldReturnEmptyPageWhenNoTasksMatch(){
+    void shouldReturnEmptyPageWhenNoTasksMatch() {
         Pageable pageable = PageRequest.of(0, 10, Sort.by("title").ascending());
         when(todolistRepository.findByTitleContaining("Inexistente", pageable)).thenReturn(Page.empty(pageable));
 
@@ -80,7 +77,6 @@ public class TodolistRepositoryTest {
         assertThat(result.getContent()).isEmpty();
         verify(todolistRepository).findByTitleContaining("Inexistente", pageable);
     }
-
 
 
 }

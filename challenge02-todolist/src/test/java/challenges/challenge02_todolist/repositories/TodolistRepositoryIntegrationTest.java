@@ -23,12 +23,12 @@ public class TodolistRepositoryIntegrationTest {
     private TodolistRepository todolistRepository;
 
     @BeforeEach
-    void setUp(){
+    void setUp() {
         todolistRepository.deleteAll();
     }
 
     @Test
-    void shouldSaveAndFindTodolistById(){
+    void shouldSaveAndFindTodolistById() {
         Todolist newTask = new Todolist(null, "Tarefa 1", "Descricao", TodoStatus.PENDENTE, null, null);
         Todolist savedTask = todolistRepository.save(newTask);
         Todolist foundTask = todolistRepository.findById(savedTask.getId()).orElse(null);
@@ -42,7 +42,7 @@ public class TodolistRepositoryIntegrationTest {
     }
 
     @Test
-    void shouldReturnTasksByStatus(){
+    void shouldReturnTasksByStatus() {
         Todolist newTask = new Todolist(null, "Tarefa 1", "Descricao", TodoStatus.CONCLUIDA, null, null);
         Todolist newTask2 = new Todolist(null, "Tarefa 3", "Descricao 3", TodoStatus.PENDENTE, null, null);
         todolistRepository.saveAll(Arrays.asList(newTask, newTask2));
@@ -59,7 +59,7 @@ public class TodolistRepositoryIntegrationTest {
     }
 
     @Test
-    void shouldFindTasksByPartialTitle(){
+    void shouldFindTasksByPartialTitle() {
         Todolist newTask = new Todolist(null, "Tarefa 1", "Descricao", TodoStatus.CONCLUIDA, null, null);
         Todolist newTask2 = new Todolist(null, "Tarefa 3", "Descricao 3", TodoStatus.PENDENTE, null, null);
         todolistRepository.saveAll(Arrays.asList(newTask, newTask2));
@@ -77,7 +77,7 @@ public class TodolistRepositoryIntegrationTest {
     }
 
     @Test
-    void shouldReturnEmptyPageWhenNoTasksMatch(){
+    void shouldReturnEmptyPageWhenNoTasksMatch() {
         //Cenário: Banco está vazio
         Pageable pageable = PageRequest.of(0, 10, Sort.by("title").ascending());
 
@@ -91,17 +91,16 @@ public class TodolistRepositoryIntegrationTest {
     }
 
     @Test
-    void shouldHandlePaginationcorrectly(){
+    void shouldHandlePaginationcorrectly() {
         //Cenário: Salva várias tarefas
-        for(int i = 1; i<=10; i++){
-            todolistRepository.save(new Todolist(null, "Tarefa " + i, "Descricao "+ i, TodoStatus.PENDENTE, null,null));
+        for (int i = 1; i <= 10; i++) {
+            todolistRepository.save(new Todolist(null, "Tarefa " + i, "Descricao " + i, TodoStatus.PENDENTE, null, null));
         }
 
         Pageable pageable = PageRequest.of(0, 5, Sort.by("title").ascending());
 
         //Execução: Pagina 1 com 5 elementos por página
         Page<Todolist> page = todolistRepository.findByStatus(TodoStatus.PENDENTE, pageable);
-
 
 
         //Verificação
@@ -117,7 +116,7 @@ public class TodolistRepositoryIntegrationTest {
     }
 
     @Test
-    void shouldReturnEmptyOptionalForNonExistingId(){
+    void shouldReturnEmptyOptionalForNonExistingId() {
         Todolist task = todolistRepository.findById(999L).orElse(null);
         assertThat(task).isNull();
     }

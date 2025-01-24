@@ -1,19 +1,26 @@
 package challenges.challenge02_todolist.services;
 
-import challenges.challenge02_todolist.assemblers.TodolistAssembler;
+
 import challenges.challenge02_todolist.controllers.TodolistController;
-import challenges.challenge02_todolist.models.Todolist;
-import challenges.challenge02_todolist.models.enums.TodoStatus;
-import challenges.challenge02_todolist.repositories.TodolistRepository;
+import challenges.challenge02_todolist.mappers.ModelMapper;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+
+import org.springframework.data.web.PagedResourcesAssembler;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.Link;
+
 import org.springframework.hateoas.PagedModel;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
@@ -25,26 +32,61 @@ public class TodolistService {
     private TodolistRepository repository;
 
     @Autowired
-    private TodolistAssembler todolistAssembler;
+    PagedResourcesAssembler<Todolist> assembler;
 
-    public PagedModel<Todolist> findAll(Pageable pageable){
-        if(pageable == null){
-            pageable = PageRequest.of(0, 10, Sort.by("title").ascending());
-        }
-        Page<Todolist> page = repository.findAll(pageable);
+    public PagedModel<EntityModel<Todolist>> findAll(Pageable pageable){
+       Page<Todolist> tasks = repository.findAll(pageable);
 
-        //Converte o page<Todolist> para PagedModel<Todolist>
-        return todolistAssembler.toPagedModel(page);
+        Page<Todolist> listTasks = tasks.map(t -> ModelMapper.parseObject(t, Todolist.class));
+        listTasks.map(
+                t -> t.add(
+                        linkTo(methodOn(TodolistController.class)
+                                .findById(t.getId())).withSelfRel()
+                )
+        );
+
+        Link link = linkTo(
+                methodOn(TodolistController.class)
+                        .findAll(pageable.getPageNumber(), pageable.getPageSize(), "asc")).withSelfRel();
+
+        return assembler.toModel(listTasks, link);
     }
 
-    public PagedModel<Todolist> findByTitle(String title, Pageable pageable){
-        Page<Todolist> page =  repository.findByTitleContaining(title, pageable);
-        return todolistAssembler.toPagedModel(page);
+    public PagedModel<EntityModel<Todolist>> findByTitle(String title, Pageable pageable){
+        Page<Todolist> tasks = repository.findByTitleContaining(title, pageable);
+        Page<Todolist> listTasks = tasks.map(t -> ModelMapper.parseObject(t, Todolist.class));
+        listTasks.map(
+                t -> t.add(
+                        linkTo(methodOn(TodolistController.class)
+                                .findById(t.getId())).withSelfRel()
+                )
+        );
+
+        Link link = linkTo(
+                methodOn(TodolistController.class)
+                        .findByTitle(title, pageable.getPageNumber(), pageable.getPageSize(), "asc")).withSelfRel();
+
+        return assembler.toModel(listTasks, link);
+
+
     }
 
-    public PagedModel<Todolist> findByStatus(TodoStatus status, Pageable pageable ){
-        Page<Todolist> page =  repository.findByStatus(status, pageable);
-        return todolistAssembler.toPagedModel(page);
+    public PagedModel<EntityModel<Todolist>> findByStatus(TodoStatus status, Pageable pageable){
+        Page<Todolist> tasks = repository.findByStatus(status, pageable);
+        Page<Todolist> listTasks = tasks.map(t -> ModelMapper.parseObject(t, Todolist.class));
+        listTasks.map(
+                t -> t.add(
+                        linkTo(methodOn(TodolistController.class)
+                                .findById(t.getId())).withSelfRel()
+                )
+        );
+
+        Link link = linkTo(
+                methodOn(TodolistController.class)
+                        .findByStatus( status ,pageable.getPageNumber(), pageable.getPageSize(), "asc")).withSelfRel();
+
+        return assembler.toModel(listTasks, link);
+
     }
 
     public Todolist findById(Long id){

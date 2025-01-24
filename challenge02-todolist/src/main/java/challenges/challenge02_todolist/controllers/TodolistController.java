@@ -9,11 +9,16 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.apache.coyote.Response;
+import org.hibernate.query.SortDirection;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.web.PagedResourcesAssembler;
+import org.springframework.hateoas.EntityModel;
+
 import org.springframework.hateoas.PagedModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -33,39 +38,55 @@ public class TodolistController {
 
     @Operation(summary = "Endpoint findAll com paginação")
     @GetMapping
-    public ResponseEntity<PagedModel<Todolist>> findAll(
-            @Parameter(description = "Parâmetros de paginação",
-                    example = "{\"page\":0, \"size\": 10, \"sort\": \"title,asc\" }") Pageable pageable) {
+    public ResponseEntity<PagedModel<EntityModel<Todolist>>> findAll(
+            @RequestParam(value = "page", defaultValue = "0") Integer page,
+            @RequestParam(value = "size", defaultValue = "5") Integer size,
+            @RequestParam(value = "direction", defaultValue = "asc") String direction
+    ) {
+        var sortDirection = "desc".equalsIgnoreCase(direction) ? Sort.Direction.DESC: Sort.Direction.ASC;
+        Pageable pageable = PageRequest.of(page, size, Sort.by(sortDirection, "id"));
+        return ResponseEntity.ok(service.findAll(pageable));
 
-        PagedModel<Todolist> tasks = service.findAll(pageable);
-        return ResponseEntity.ok(tasks);
     }
 
-    @Operation(summary = "Endpoint de busca com paginação")
+
     @GetMapping("/busca")
-    public ResponseEntity<PagedModel<Todolist>> findByTitle(
-            @RequestParam String title,
-            @Parameter(description = "Parâmetros de paginação",
-                    example = "{\"page\":0, \"size\": 10, \"sort\": \"title,asc\" }") Pageable pageable) {
-        PagedModel<Todolist> page = service.findByTitle(title, pageable);
-        return ResponseEntity.ok(page);
+    public ResponseEntity<PagedModel<EntityModel<Todolist>>> findByTitle(
+            @RequestParam(value = "title") String title,
+            @RequestParam(value = "page", defaultValue = "0") Integer page,
+            @RequestParam(value = "size", defaultValue = "5") Integer size,
+            @RequestParam(value = "direction", defaultValue = "asc") String direction
+
+    ) {
+        var sortDirection = "desc".equalsIgnoreCase(direction) ? Sort.Direction.DESC: Sort.Direction.ASC;
+        Pageable pageable = PageRequest.of(page, size, Sort.by(sortDirection, "id"));
+
+        return ResponseEntity.ok(service.findByTitle(title,pageable));
     }
 
-    @Operation(summary = "Endpoint busca por status com paginação")
     @GetMapping("/status")
-    public ResponseEntity<PagedModel<Todolist>> findByStatus(
-            @RequestParam TodoStatus status,
-            @Parameter(description = "Parâmetros de paginação",
-                    example = "{\"page\":0, \"size\": 10, \"sort\": \"title,asc\" }") Pageable pageable) {
-        PagedModel<Todolist> page = service.findByStatus(status, pageable);
-        return ResponseEntity.ok(page);
+    public ResponseEntity<PagedModel<EntityModel<Todolist>>> findByStatus(
+            @RequestParam(value = "status") TodoStatus status,
+            @RequestParam(value = "page", defaultValue = "0") Integer page,
+            @RequestParam(value = "size", defaultValue = "5") Integer size,
+            @RequestParam(value = "direction", defaultValue = "asc") String direction
+    ) {
+        var sortDirection = "desc".equalsIgnoreCase(direction) ? Sort.Direction.DESC: Sort.Direction.ASC;
+        Pageable pageable = PageRequest.of(page, size, Sort.by(sortDirection, "id"));
+
+        return ResponseEntity.ok(service.findByStatus(status,pageable));
     }
 
-    @Operation(summary = "Endpoint findById")
+
+
     @GetMapping("/{id}")
     public ResponseEntity<Todolist> findById(@PathVariable Long id) {
         Todolist task = service.findById(id);
-        return ResponseEntity.ok(task);
+      
+        EntityModel<Todolist> model = EntityModel.of(task);
+        model.add(linkTo(methodOn(TodolistController.class).findById(task.getId())).withSelfRel());
+        return ResponseEntity.ok(model);
+
     }
 
     @Operation(summary = "Cria uma nova tarefa", description = "Cria uma nova tarefa no sistema")
@@ -81,7 +102,11 @@ public class TodolistController {
         toDoList.setStatus(request.getStatus());
 
         Todolist savedTask = service.insert(toDoList);
-        return ResponseEntity.status(HttpStatus.CREATED).body(savedTask);
+
+        EntityModel<Todolist> model = EntityModel.of(savedTask);
+        model.add(linkTo(methodOn(TodolistController.class).findById(savedTask.getId())).withSelfRel());
+        return ResponseEntity.status(HttpStatus.CREATED).body(model);
+
     }
 
     @Operation(summary = "Atualiza uma tarefa existente", description = "Atualiza os detalhes de uma tarefa")
@@ -90,6 +115,11 @@ public class TodolistController {
         if (result.hasErrors()) {
             return ResponseEntity.badRequest().build();
         }
+
+        Todolist updatedTask = service.update(id, toDoList);
+        EntityModel<Todolist> model = EntityModel.of(updatedTask);
+        model.add(linkTo(methodOn(TodolistController.class).findById(updatedTask.getId())).withSelfRel());
+
 
         //Convertendo DTO para entidade
         Todolist toDoList = new Todolist();
@@ -108,4 +138,5 @@ public class TodolistController {
         return ResponseEntity.noContent().build();
     }
 
+  
 }
