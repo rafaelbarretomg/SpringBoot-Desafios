@@ -53,7 +53,8 @@ public class TodolistControllerIntegrationTest {
         mockMvc.perform(get("/tarefas")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())// O status deve ser 200 OK
-                .andExpect(jsonPath("$.content.length()").value(2)); // verifica se retorna 2 tarefas
+                .andExpect(jsonPath("$._embedded.todolistList[0].id").value(1))
+                .andExpect(jsonPath("$._embedded.todolistList[1].id").value(2));
 
     }
 

@@ -7,8 +7,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.*;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.PagedModel;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -22,34 +25,54 @@ public class TodolistServiceIntegrationTest {
     @Autowired
     private TodolistRepository todolistRepository;
 
+    private Pageable pageable;
+    private Page<Todolist> page;
+
     @BeforeEach
     void setUp() {
+        // Criando um Pageable fictício para os testes
+        pageable = PageRequest.of(0, 10, Sort.by("id").ascending());
+
         todolistRepository.deleteAll();
+    }
+
+   @Test
+    void shouldReturnAllTodolist() {
+       Todolist task1 = new Todolist(null, "Tarefa 1", "Descricao", TodoStatus.PENDENTE, null, null);
+       Todolist task2 = new Todolist(null, "Tarefa 2", "Descricao 2", TodoStatus.EM_ANDAMENTO, null, null);
+        todolistService.insert(task1);
+        todolistService.insert(task2);
+
+        PagedModel<EntityModel<Todolist>> result = todolistService.findAll(pageable);
+
+        assertThat(result).hasSize(2);
+        assertThat(result).isNotNull();
+        result.getContent().forEach(taskModel -> {
+            Todolist task = taskModel.getContent();
+            if(task.getTitle().equals("Tarefa 1")){
+                assertThat(task.getTitle()).isEqualTo("Tarefa 1");
+                assertThat(task.getDescription()).isEqualTo("Descricao");
+                assertThat(task.getStatus()).isEqualTo(TodoStatus.PENDENTE);
+            }else if(task.getTitle().equals("Tarefa 2")){
+                assertThat(task.getTitle()).isEqualTo("Tarefa 2");
+                assertThat(task.getDescription()).isEqualTo("Descricao 2");
+                assertThat(task.getStatus()).isEqualTo(TodoStatus.EM_ANDAMENTO);
+            }
+
+        });
+
     }
 
     @Test
     void shouldFindTodolistById(){
         Todolist newTask = new Todolist(null, "Tarefa 1", "Descricao", TodoStatus.PENDENTE, null, null);
+
         Todolist savedTask = todolistService.insert(newTask);
 
         Todolist foundTask = todolistService.findById(savedTask.getId());
 
         assertThat(foundTask).isNotNull();
         assertThat(foundTask.getId()).isEqualTo(savedTask.getId());
-    }
-
-    @Test
-    void shouldReturnAllTodolist() {
-        Todolist task1 = new Todolist(null, "Tarefa 1", "Descricao", TodoStatus.PENDENTE, null, null);
-        Todolist task2 = new Todolist(null, "Tarefa 2", "Descricao", TodoStatus.PENDENTE, null, null);
-        todolistService.insert(task1);
-        todolistService.insert(task2);
-
-        List<Todolist> allTasks = todolistService.findAll(Pageable.unpaged()).getContent();
-
-        assertThat(allTasks).hasSize(2);
-        assertThat(allTasks).extracting(Todolist::getTitle).contains("Tarefa 1", "Tarefa 2");
-
     }
 
     @Test
