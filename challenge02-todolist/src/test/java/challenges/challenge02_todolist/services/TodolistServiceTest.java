@@ -1,40 +1,26 @@
 package challenges.challenge02_todolist.services;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
-
-import java.time.LocalDateTime;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
-
-import challenges.challenge02_todolist.controllers.TodolistController;
-import challenges.challenge02_todolist.mappers.ModelMapper;
+import challenges.challenge02_todolist.models.Todolist;
+import challenges.challenge02_todolist.models.enums.TodoStatus;
+import challenges.challenge02_todolist.repositories.TodolistRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-
-import challenges.challenge02_todolist.models.Todolist;
-import challenges.challenge02_todolist.models.enums.TodoStatus;
-import challenges.challenge02_todolist.repositories.TodolistRepository;
+import org.springframework.data.domain.*;
 import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.PagedModel;
+
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 
 public class TodolistServiceTest {
 
@@ -61,7 +47,7 @@ public class TodolistServiceTest {
     }
 
     private Todolist createTestTask(Long id) {
-        return new Todolist(id, "Tarefa " +id, "Iniciando Tarefa Teste "+ id, TodoStatus.PENDENTE,
+        return new Todolist(id, "Tarefa " + id, "Iniciando Tarefa Teste " + id, TodoStatus.PENDENTE,
                 LocalDateTime.of(2023, 1, 15, 10, 0),
                 LocalDateTime.of(2023, 1, 20, 18, 0));
     }
@@ -165,7 +151,7 @@ public class TodolistServiceTest {
     }
 
     @Test
-    void saveTest(){
+    void saveTest() {
         Todolist task = createTestTask(1L);
 
         when(repository.save(task)).thenReturn(task);
@@ -184,11 +170,11 @@ public class TodolistServiceTest {
     }
 
     @Test
-    void saveTest_throwsExcepiton(){
+    void saveTest_throwsExcepiton() {
         Todolist task = createTestTask(1L);
         when(repository.save(task)).thenThrow(new RuntimeException("Erro ao inserir uma tarefa"));
 
-        RuntimeException exception = assertThrows(RuntimeException.class, ()->{
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
             service.insert(task);
         });
 
@@ -196,7 +182,7 @@ public class TodolistServiceTest {
     }
 
     @Test
-    void updateTest(){
+    void updateTest() {
         Long taskId = 1L;
 
         //Todolist originalTask = createTestTask(taskId);
@@ -224,9 +210,9 @@ public class TodolistServiceTest {
         verify(repository, times(1)).save(updatedTask);
     }
 
-    
+
     @Test
-    void updateTest_TaskNotFound(){
+    void updateTest_TaskNotFound() {
         Long taskId = 1L;
 
         Todolist updatedTask = createTestTask(1L);
@@ -238,7 +224,7 @@ public class TodolistServiceTest {
 
         when(repository.existsById(taskId)).thenReturn(false);
 
-        RuntimeException exception = assertThrows(RuntimeException.class, ()->{
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
             service.update(taskId, updatedTask);
         });
 
@@ -250,7 +236,7 @@ public class TodolistServiceTest {
     }
 
     @Test
-    void deleteTest(){
+    void deleteTest() {
         Long taskId = 1L;
 
         when(repository.existsById(taskId)).thenReturn(true);
@@ -263,12 +249,12 @@ public class TodolistServiceTest {
     }
 
     @Test
-    void deleteTest_TaskNotFound(){
+    void deleteTest_TaskNotFound() {
         Long taskId = 1L;
 
         when(repository.existsById(taskId)).thenReturn(false);
 
-        RuntimeException exception = assertThrows(RuntimeException.class, ()->{
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
             service.delete(taskId);
         });
 

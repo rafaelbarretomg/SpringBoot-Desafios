@@ -5,22 +5,18 @@ import challenges.challenge02_todolist.models.enums.TodoStatus;
 import challenges.challenge02_todolist.services.TodolistService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.data.domain.*;
-import org.springframework.data.web.PagedResourcesAssembler;
+import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.EntityModel;
-import org.springframework.hateoas.Link;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDateTime;
-import java.util.Arrays;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -40,18 +36,9 @@ public class TodolistControllerTest {
     @MockitoBean
     private TodolistService service;
 
-    @Mock
-    PagedResourcesAssembler<Todolist> assembler;
-
-    private Pageable pageable;
-    private Page<Todolist> page;
-
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-
-        // Criando um Pageable fictício para os testes
-        pageable = PageRequest.of(0, 10, Sort.by("id").ascending());
     }
 
     private Todolist createTestTask(Long id) {

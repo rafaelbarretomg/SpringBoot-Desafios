@@ -7,12 +7,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.domain.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.PagedModel;
-
-import java.time.LocalDateTime;
-import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -36,10 +36,10 @@ public class TodolistServiceIntegrationTest {
         todolistRepository.deleteAll();
     }
 
-   @Test
+    @Test
     void shouldReturnAllTodolist() {
-       Todolist task1 = new Todolist(null, "Tarefa 1", "Descricao", TodoStatus.PENDENTE, null, null);
-       Todolist task2 = new Todolist(null, "Tarefa 2", "Descricao 2", TodoStatus.EM_ANDAMENTO, null, null);
+        Todolist task1 = new Todolist(null, "Tarefa 1", "Descricao", TodoStatus.PENDENTE, null, null);
+        Todolist task2 = new Todolist(null, "Tarefa 2", "Descricao 2", TodoStatus.EM_ANDAMENTO, null, null);
         todolistService.insert(task1);
         todolistService.insert(task2);
 
@@ -49,11 +49,11 @@ public class TodolistServiceIntegrationTest {
         assertThat(result).isNotNull();
         result.getContent().forEach(taskModel -> {
             Todolist task = taskModel.getContent();
-            if(task.getTitle().equals("Tarefa 1")){
+            if (task.getTitle().equals("Tarefa 1")) {
                 assertThat(task.getTitle()).isEqualTo("Tarefa 1");
                 assertThat(task.getDescription()).isEqualTo("Descricao");
                 assertThat(task.getStatus()).isEqualTo(TodoStatus.PENDENTE);
-            }else if(task.getTitle().equals("Tarefa 2")){
+            } else if (task.getTitle().equals("Tarefa 2")) {
                 assertThat(task.getTitle()).isEqualTo("Tarefa 2");
                 assertThat(task.getDescription()).isEqualTo("Descricao 2");
                 assertThat(task.getStatus()).isEqualTo(TodoStatus.EM_ANDAMENTO);
@@ -64,7 +64,7 @@ public class TodolistServiceIntegrationTest {
     }
 
     @Test
-    void shouldFindTodolistById(){
+    void shouldFindTodolistById() {
         Todolist newTask = new Todolist(null, "Tarefa 1", "Descricao", TodoStatus.PENDENTE, null, null);
 
         Todolist savedTask = todolistService.insert(newTask);
@@ -76,7 +76,7 @@ public class TodolistServiceIntegrationTest {
     }
 
     @Test
-    void shouldInsertTodolist(){
+    void shouldInsertTodolist() {
         Todolist newTask = new Todolist(null, "Tarefa 1", "Descricao", TodoStatus.PENDENTE, null, null);
         Todolist savedTask = todolistService.insert(newTask);
 
@@ -88,14 +88,14 @@ public class TodolistServiceIntegrationTest {
     }
 
     @Test
-    void shouldUpdateTodolist(){
+    void shouldUpdateTodolist() {
         Todolist newTask = new Todolist(null, "Tarefa 1", "Descricao", TodoStatus.PENDENTE, null, null);
         Todolist savedTask = todolistService.insert(newTask);
 
         Todolist updatedTask = new Todolist(savedTask.getId(), "Tarefa atualizada", "Descricao atualizada", TodoStatus.CONCLUIDA, null, null);
-       todolistService.update(savedTask.getId(), updatedTask);
+        todolistService.update(savedTask.getId(), updatedTask);
 
-       //Buscar novamente o savedTask atualizado
+        //Buscar novamente o savedTask atualizado
         Todolist foundTask = todolistService.findById(savedTask.getId());
 
         assertThat(foundTask.getId()).isNotNull();
@@ -106,7 +106,7 @@ public class TodolistServiceIntegrationTest {
     }
 
     @Test
-    void shouldDeleteTodolist(){
+    void shouldDeleteTodolist() {
         Todolist newTask = new Todolist(null, "Tarefa 1", "Descricao", TodoStatus.PENDENTE, null, null);
         Todolist savedTask = todolistService.insert(newTask);
 
