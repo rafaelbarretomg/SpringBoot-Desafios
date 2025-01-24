@@ -6,8 +6,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import  challenges.challenge02_todolist.models.Todolist;
 import challenges.challenge02_todolist.models.enums.TodoStatus;
+import org.springframework.hateoas.PagedModel;
 
-
+import java.util.List;
 
 
 public interface TodolistRepository extends JpaRepository<Todolist, Long>{

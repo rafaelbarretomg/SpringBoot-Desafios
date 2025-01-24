@@ -1,22 +1,26 @@
 package challenges.challenge02_todolist.services;
 
+
 import challenges.challenge02_todolist.controllers.TodolistController;
 import challenges.challenge02_todolist.mappers.ModelMapper;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+
 import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.Link;
+
 import org.springframework.hateoas.PagedModel;
 import org.springframework.stereotype.Service;
 
-import challenges.challenge02_todolist.models.Todolist;
-import challenges.challenge02_todolist.models.enums.TodoStatus;
-import challenges.challenge02_todolist.repositories.TodolistRepository;
-import org.springframework.transaction.annotation.Transactional;
+import java.util.List;
+
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
@@ -82,6 +86,7 @@ public class TodolistService {
                         .findByStatus( status ,pageable.getPageNumber(), pageable.getPageSize(), "asc")).withSelfRel();
 
         return assembler.toModel(listTasks, link);
+
     }
 
     public Todolist findById(Long id){
