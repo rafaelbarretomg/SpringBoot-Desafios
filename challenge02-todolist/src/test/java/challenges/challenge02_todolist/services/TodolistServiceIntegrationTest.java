@@ -71,7 +71,6 @@ public class TodolistServiceIntegrationTest {
 
         Todolist foundTask = todolistService.findById(savedTask.getId());
 
-
         assertThat(foundTask).isNotNull();
         assertThat(foundTask.getId()).isEqualTo(savedTask.getId());
     }

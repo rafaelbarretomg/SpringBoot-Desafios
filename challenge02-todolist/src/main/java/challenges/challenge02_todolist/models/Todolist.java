@@ -4,7 +4,6 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import io.swagger.v3.oas.annotations.media.Schema;
 import org.hibernate.annotations.CreationTimestamp;
 
 import challenges.challenge02_todolist.models.enums.TodoStatus;
@@ -18,7 +17,6 @@ import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Size;
 import org.springframework.hateoas.RepresentationModel;
 
-@Schema(description = "Todolist")
 @Entity
 @Table(name = "todolist")
 public class Todolist extends RepresentationModel<Todolist> implements Serializable{
@@ -27,7 +25,10 @@ public class Todolist extends RepresentationModel<Todolist> implements Serializa
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
+    
+    @NotEmpty(message = "Titulo é obrigatório")
+    @NotBlank(message = "Titulo nao pode conter apenas espaçoes!")
+    @Size(min = 3, max = 100, message = "Titulo deve ter entre 3 e 100 caracteres")
     private String title;
 
     private String description;
@@ -39,7 +40,7 @@ public class Todolist extends RepresentationModel<Todolist> implements Serializa
 
     private LocalDateTime conclusionDate;
 
-    public Todolist(){}
+    Todolist(){}
 
     public Todolist(Long id,
             @NotEmpty(message = "Titulo é obrigatório") @NotBlank(message = "Titulo nao pode conter apenas espaçoes!") @Size(min = 3, max = 100, message = "Titulo deve ter entre 3 e 100 caracteres") String title,
