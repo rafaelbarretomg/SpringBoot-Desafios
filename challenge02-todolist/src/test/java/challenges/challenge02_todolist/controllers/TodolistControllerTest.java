@@ -53,7 +53,7 @@ public class TodolistControllerTest {
     }
 
     @Test
-    void shouldReturnAllTodoLists() throws Exception {
+    void shouldReturnAllTasks() throws Exception {
         // Criando um PagedModel fictício
         PagedModel<EntityModel<Todolist>> mockPagedModel = PagedModel.of(
                 List.of(
@@ -75,9 +75,44 @@ public class TodolistControllerTest {
                 .andExpect(jsonPath("$._embedded.todolistList[1].id").value(2));
     }
 
+    @Test
+    void shouldReturnTasks_WhenTitleMatches() throws Exception {
+        PagedModel<EntityModel<Todolist>> mockPagedModel = PagedModel.of(
+                List.of(
+                        EntityModel.of(createTestTask(1L)),
+                        EntityModel.of(createTestTask(2L))
+                ),
+                new PagedModel.PageMetadata(10, 0, 2)
+        );
+
+        when(service.findByTitle(eq("Tarefa"), any(Pageable.class))).thenReturn(mockPagedModel);
+
+        mockMvc.perform(get("/tarefas/busca?title=Tarefa&size=3"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$._embedded.todolistList[0].title").value("Tarefa 1"));
+    }
 
     @Test
-    void shouldReturnTodolistById() throws Exception {
+    void shouldReturnTask_WhenStatusMatches() throws Exception {
+        PagedModel<EntityModel<Todolist>> mockPagedModel = PagedModel.of(
+                List.of(
+                        EntityModel.of(createTestTask(1L)),
+                        EntityModel.of(createTestTask(2L))
+                ),
+                new PagedModel.PageMetadata(10, 0, 2)
+        );
+
+        when(service.findByStatus(eq(TodoStatus.PENDENTE), any(Pageable.class))).thenReturn(mockPagedModel);
+
+        mockMvc.perform(get("/tarefas/status?status=PENDENTE&size=3"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$._embedded.todolistList[0].title").value("Tarefa 1"))
+                .andExpect(jsonPath("$._embedded.todolistList[1].title").value("Tarefa 2"));
+    }
+
+
+    @Test
+    void shouldReturnTaskById() throws Exception {
         Todolist task = createTestTask(1L);
 
         when(service.findById(anyLong())).thenReturn(task);
@@ -90,7 +125,7 @@ public class TodolistControllerTest {
     }
 
     @Test
-    void shouldInsertTodolist() throws Exception {
+    void shouldInsertTask() throws Exception {
         Todolist task = createTestTask(1L);
 
         when(service.insert(any(Todolist.class))).thenReturn(task);
@@ -116,7 +151,7 @@ public class TodolistControllerTest {
 
 
     @Test
-    void shouldUpdateTodolist() throws Exception {
+    void shouldUpdateTask() throws Exception {
         Todolist task = createTestTask(1L);
 
         when(service.update(anyLong(), any(Todolist.class))).thenReturn(task);
@@ -140,7 +175,7 @@ public class TodolistControllerTest {
     }
 
     @Test
-    void shouldDeleteTodolist() throws Exception {
+    void shouldDeleteTask() throws Exception {
         Mockito.doNothing().when(service).delete(anyLong());
 
         mockMvc.perform(delete("/tarefas/{id}", 1))

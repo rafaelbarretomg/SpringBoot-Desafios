@@ -28,21 +28,23 @@ public class TodolistRepositoryIntegrationTest {
     }
 
     @Test
-    void shouldSaveAndFindTodolistById() {
-        Todolist newTask = new Todolist(null, "Tarefa 1", "Descricao", TodoStatus.PENDENTE, null, null);
-        Todolist savedTask = todolistRepository.save(newTask);
-        Todolist foundTask = todolistRepository.findById(savedTask.getId()).orElse(null);
+    void shouldReturnAllTasks() {
+        Todolist newTask = new Todolist(null, "Tarefa 1", "Descricao", TodoStatus.CONCLUIDA, null, null);
+        Todolist newTask2 = new Todolist(null, "Tarefa 3", "Descricao 3", TodoStatus.PENDENTE, null, null);
+        todolistRepository.saveAll(Arrays.asList(newTask, newTask2));
+
+        //busca pelo status
+        Pageable pageable = PageRequest.of(0, 10, Sort.by("title").ascending());
+        Page<Todolist> tasks = todolistRepository.findAll(pageable);
 
         //verificacoes
-        assertThat(foundTask).isNotNull();
-        assertThat(foundTask.getId()).isEqualTo(savedTask.getId());
-        assertThat(foundTask.getTitle()).isEqualTo("Tarefa 1");
-        assertThat(foundTask.getDescription()).isEqualTo("Descricao");
-        assertThat(foundTask.getStatus()).isEqualTo(TodoStatus.PENDENTE);
+        assertThat(tasks.getContent()).hasSize(2);
+        assertThat(tasks.getContent().get(0).getStatus()).isEqualTo(TodoStatus.CONCLUIDA);
+        assertThat(tasks.getContent().get(1).getTitle()).isEqualTo("Tarefa 3");
     }
 
     @Test
-    void shouldReturnTasksByStatus() {
+    void shouldReturnTasks_WhenStatusMatches() {
         Todolist newTask = new Todolist(null, "Tarefa 1", "Descricao", TodoStatus.CONCLUIDA, null, null);
         Todolist newTask2 = new Todolist(null, "Tarefa 3", "Descricao 3", TodoStatus.PENDENTE, null, null);
         todolistRepository.saveAll(Arrays.asList(newTask, newTask2));
@@ -59,7 +61,7 @@ public class TodolistRepositoryIntegrationTest {
     }
 
     @Test
-    void shouldFindTasksByPartialTitle() {
+    void shouldReturnTasks_WhenTitleMatches() {
         Todolist newTask = new Todolist(null, "Tarefa 1", "Descricao", TodoStatus.CONCLUIDA, null, null);
         Todolist newTask2 = new Todolist(null, "Tarefa 3", "Descricao 3", TodoStatus.PENDENTE, null, null);
         todolistRepository.saveAll(Arrays.asList(newTask, newTask2));
@@ -113,6 +115,20 @@ public class TodolistRepositoryIntegrationTest {
         assertThat(page.getContent().get(0).getTitle()).isEqualTo("Tarefa 1");
         assertThat(page.getContent().get(4).getTitle()).isEqualTo("Tarefa 4");
 
+    }
+
+    @Test
+    void shouldFindTaskById() {
+        Todolist newTask = new Todolist(null, "Tarefa 1", "Descricao", TodoStatus.PENDENTE, null, null);
+        Todolist savedTask = todolistRepository.save(newTask);
+        Todolist foundTask = todolistRepository.findById(savedTask.getId()).orElse(null);
+
+        //verificacoes
+        assertThat(foundTask).isNotNull();
+        assertThat(foundTask.getId()).isEqualTo(savedTask.getId());
+        assertThat(foundTask.getTitle()).isEqualTo("Tarefa 1");
+        assertThat(foundTask.getDescription()).isEqualTo("Descricao");
+        assertThat(foundTask.getStatus()).isEqualTo(TodoStatus.PENDENTE);
     }
 
     @Test

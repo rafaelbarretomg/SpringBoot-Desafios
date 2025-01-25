@@ -20,9 +20,31 @@ public class TodolistRepositoryTest {
     @Mock
     private TodolistRepository todolistRepository;
 
+    @Test
+    void shouldReturnAllTodoLists() {
+        //Mock de dados
+        List<Todolist> mockTasks = List.of(new Todolist(1L, "Comprar pao", "Ir a padaria", TodoStatus.PENDENTE, null, null));
+        Pageable pageable = PageRequest.of(0, 10, Sort.by("title").ascending());
+
+        when(todolistRepository.findAll(pageable)).thenReturn(new PageImpl<>(mockTasks, pageable, mockTasks.size()));
+
+        //Execucao
+        Page<Todolist> result = todolistRepository.findAll(pageable);
+
+        //verificacao
+        assertThat(result).isNotNull();
+        assertThat(result).hasSize(1);
+        assertThat(result.getContent().get(0).getTitle()).isEqualTo("Comprar pao");
+        assertThat(result.getContent().get(0).getDescription()).isEqualTo("Ir a padaria");
+        assertThat(result.getContent().get(0).getStatus()).isEqualTo(TodoStatus.PENDENTE);
+
+        //garantir que o mock foi chamado
+        verify(todolistRepository).findAll(pageable);
+    }
+
 
     @Test
-    void shouldFindTasksByPartialTitle() {
+    void shouldReturnTasks_WhenTitleMatches() {
         //Mock de dados
         List<Todolist> mockTasks = List.of(new Todolist(1L, "Comprar pao", "Ir a padaria", TodoStatus.PENDENTE, null, null));
         Pageable pageable = PageRequest.of(0, 10, Sort.by("title").ascending());
@@ -44,7 +66,7 @@ public class TodolistRepositoryTest {
     }
 
     @Test
-    void shouldReturnTasksByStatus() {
+    void shouldReturnTasks_WhenStatusMatches() {
         //Mock de dados
         List<Todolist> mockTasks = List.of(new Todolist(1L, "Comprar pao", "Ir a padaria", TodoStatus.PENDENTE, null, null));
         Pageable pageable = PageRequest.of(0, 10, Sort.by("title").ascending());
@@ -67,7 +89,7 @@ public class TodolistRepositoryTest {
     }
 
     @Test
-    void shouldReturnEmptyPageWhenNoTasksMatch() {
+    void shouldReturnEmptyPage_WhenNoTasksMatch() {
         Pageable pageable = PageRequest.of(0, 10, Sort.by("title").ascending());
         when(todolistRepository.findByTitleContaining("Inexistente", pageable)).thenReturn(Page.empty(pageable));
 

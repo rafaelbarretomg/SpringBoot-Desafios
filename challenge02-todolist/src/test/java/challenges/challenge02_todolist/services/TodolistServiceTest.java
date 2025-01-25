@@ -54,7 +54,7 @@ public class TodolistServiceTest {
 
 
     @Test
-    public void findAll_WhenDataExists_ShouldReturnPageWithTasks() {
+    public void shouldReturnAllTasks_WhenDataExists() {
         // Mockando o comportamento do repositório
         when(repository.findAll(pageable)).thenReturn(page);
 
@@ -100,7 +100,7 @@ public class TodolistServiceTest {
 
 
     @Test
-    void findAll_WhenNoDataExists_ShouldReturnEmptyPage() {
+    void shouldReturnEmptyPageFindAll_WhenDataNonExists() {
         when(repository.findAll(pageable)).thenReturn(Page.empty(pageable));
 
         PagedModel<EntityModel<Todolist>> mockPagedModel = mock(PagedModel.class);
@@ -118,9 +118,81 @@ public class TodolistServiceTest {
 
     }
 
+    @Test
+    void shouldReturnTasks_WhenTitleMatches(){
+        when(repository.findByTitleContaining("Tarefa", pageable)).thenReturn(page);
+
+        PagedModel<EntityModel<Todolist>> mockPagedModel = mock(PagedModel.class);
+        when(assembler.toModel(any(Page.class), any(Link.class))).thenReturn(mockPagedModel);
+
+        when(mockPagedModel.getContent()).thenReturn(List.of(
+                EntityModel.of(createTestTask(1L)),
+                EntityModel.of(createTestTask(2L))
+        ));
+
+        PagedModel<EntityModel<Todolist>> result = service.findByTitle("Tarefa", pageable);
+
+        verify(repository, times(1)).findByTitleContaining("Tarefa", pageable);
+
+        verify(assembler, times(1)).toModel(any(Page.class), any(Link.class));
+
+        assertNotNull(result);
+
+        assertTrue(result.getContent().size() > 0);
+
+        result.getContent().forEach(taskModel -> {
+            Todolist task = taskModel.getContent();
+            if (task.getTitle().equals("Tarefa 1")) {
+                assertEquals("Tarefa 1", task.getTitle());
+                assertEquals("Iniciando Tarefa Teste 1", task.getDescription());
+                assertEquals(TodoStatus.PENDENTE, task.getStatus());
+            } else if (task.getTitle().equals("Tarefa 2")) {
+                assertEquals("Tarefa 2", task.getTitle());
+                assertEquals("Iniciando Tarefa Teste 2", task.getDescription());
+                assertEquals(TodoStatus.PENDENTE, task.getStatus());
+            }
+        });
+    }
 
     @Test
-    void findById_WhenIdExists_ShouldReturnCorrectTask() {
+    void shouldReturnTasks_WhenStatusMatches(){
+        when(repository.findByStatus(TodoStatus.PENDENTE, pageable)).thenReturn(page);
+
+        PagedModel<EntityModel<Todolist>> mockPagedModel = mock(PagedModel.class);
+        when(assembler.toModel(any(Page.class), any(Link.class))).thenReturn(mockPagedModel);
+
+        when(mockPagedModel.getContent()).thenReturn(List.of(
+                EntityModel.of(createTestTask(1L)),
+                EntityModel.of(createTestTask(2L))
+        ));
+
+        PagedModel<EntityModel<Todolist>> result = service.findByStatus(TodoStatus.PENDENTE, pageable);
+
+        verify(repository, times(1)).findByStatus(TodoStatus.PENDENTE, pageable);
+
+        verify(assembler, times(1)).toModel(any(Page.class), any(Link.class));
+
+        assertNotNull(result);
+
+        assertTrue(result.getContent().size() > 0);
+
+        result.getContent().forEach(taskModel -> {
+            Todolist task = taskModel.getContent();
+            if (task.getTitle().equals("Tarefa 1")) {
+                assertEquals("Tarefa 1", task.getTitle());
+                assertEquals("Iniciando Tarefa Teste 1", task.getDescription());
+                assertEquals(TodoStatus.PENDENTE, task.getStatus());
+            } else if (task.getTitle().equals("Tarefa 2")) {
+                assertEquals("Tarefa 2", task.getTitle());
+                assertEquals("Iniciando Tarefa Teste 2", task.getDescription());
+                assertEquals(TodoStatus.PENDENTE, task.getStatus());
+            }
+        });
+    }
+
+
+    @Test
+    void shouldReturnTaskById() {
         Todolist task = createTestTask(1L);
 
         when(repository.findById(1L)).thenReturn(Optional.of(task));
@@ -138,7 +210,7 @@ public class TodolistServiceTest {
 
 
     @Test
-    void findById_WhenIdDoesNotExist_ShouldThrowException() {
+    void shouldThrowExceptionFindById_WhenDataNonExists() {
         Long id = 1L;
         when(repository.findById(id)).thenReturn(Optional.empty());
 
@@ -151,7 +223,7 @@ public class TodolistServiceTest {
     }
 
     @Test
-    void saveTest() {
+    void shouldInsertTask() {
         Todolist task = createTestTask(1L);
 
         when(repository.save(task)).thenReturn(task);
@@ -170,7 +242,7 @@ public class TodolistServiceTest {
     }
 
     @Test
-    void saveTest_throwsExcepiton() {
+    void shouldThrowException_WhenInsertTask() {
         Todolist task = createTestTask(1L);
         when(repository.save(task)).thenThrow(new RuntimeException("Erro ao inserir uma tarefa"));
 
@@ -182,7 +254,7 @@ public class TodolistServiceTest {
     }
 
     @Test
-    void updateTest() {
+    void shouldUpdateTask() {
         Long taskId = 1L;
 
         //Todolist originalTask = createTestTask(taskId);
@@ -212,7 +284,7 @@ public class TodolistServiceTest {
 
 
     @Test
-    void updateTest_TaskNotFound() {
+    void shouldThrowException_WhenTaskNotFoundToUpdate() {
         Long taskId = 1L;
 
         Todolist updatedTask = createTestTask(1L);
@@ -236,7 +308,7 @@ public class TodolistServiceTest {
     }
 
     @Test
-    void deleteTest() {
+    void shouldDeleteTask() {
         Long taskId = 1L;
 
         when(repository.existsById(taskId)).thenReturn(true);
@@ -249,7 +321,7 @@ public class TodolistServiceTest {
     }
 
     @Test
-    void deleteTest_TaskNotFound() {
+    void shouldThrowException_WhenTaskNotFoundToDelete() {
         Long taskId = 1L;
 
         when(repository.existsById(taskId)).thenReturn(false);

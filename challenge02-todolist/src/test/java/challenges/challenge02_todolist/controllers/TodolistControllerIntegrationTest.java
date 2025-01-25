@@ -38,7 +38,7 @@ public class TodolistControllerIntegrationTest {
 
 
     @Test
-    void shouldReturnAllTodolist() throws Exception {
+    void shouldReturnAllTasks() throws Exception {
         Todolist task1 = new Todolist(null, "Tarefa 1", "Descricao", TodoStatus.PENDENTE, null, null);
         Todolist task2 = new Todolist(null, "Tarefa 2", "Descricao", TodoStatus.CONCLUIDA, null, null);
 
@@ -57,7 +57,50 @@ public class TodolistControllerIntegrationTest {
     }
 
     @Test
-    void shouldReturnTodolistFindById() throws Exception {
+    void shouldReturnTasks_WhenTitleMatches() throws Exception {
+        Todolist task1 = new Todolist(null, "Tarefa 1", "Descricao", TodoStatus.PENDENTE, null, null);
+        Todolist task2 = new Todolist(null, "Acordar cedo", "Acordando", TodoStatus.EM_ANDAMENTO, null, null);
+
+        todolistRepository.save(task1);
+        todolistRepository.save(task2);
+
+        mockMvc.perform(get("/tarefas/busca?title=Tarefa&Size=5")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$._embedded.todolistList[0].title").value("Tarefa 1"));
+
+
+        mockMvc.perform(get("/tarefas/busca?title=Acordar&Size=5")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$._embedded.todolistList[0].title").value("Acordar cedo"));
+
+    }
+
+    @Test
+    void shouldReturnTasks_WhenStatusMatches() throws Exception {
+        Todolist task1 = new Todolist(null, "Tarefa 1", "Descricao", TodoStatus.PENDENTE, null, null);
+        Todolist task2 = new Todolist(null, "Acordar cedo", "Acordando", TodoStatus.EM_ANDAMENTO, null, null);
+
+        todolistRepository.save(task1);
+        todolistRepository.save(task2);
+
+
+        mockMvc.perform(get("/tarefas/status?status=PENDENTE&size=3")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$._embedded.todolistList[0].title").value("Tarefa 1"))
+                .andExpect(jsonPath("$._embedded.todolistList[0].description").value("Descricao"))
+                .andExpect(jsonPath("$._embedded.todolistList[0].status").value("PENDENTE"));
+
+        mockMvc.perform(get("/tarefas/status?status=EM_ANDAMENTO&size=3")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$._embedded.todolistList[0].description").value("Acordando"));
+    }
+
+    @Test
+    void shouldReturnTaskFindById() throws Exception {
         Todolist newTask = new Todolist(null, "Tarefa 1", "Descricao", TodoStatus.PENDENTE, null, null);
         Todolist savedTask = todolistRepository.save(newTask);
 
@@ -78,7 +121,7 @@ public class TodolistControllerIntegrationTest {
     }
 
     @Test
-    void shouldInsertTodolistAndReturnCreatedStatus() throws Exception {
+    void shouldInsertTaskAndReturnCreatedStatus() throws Exception {
         //dados de entrada
         Todolist newTask = new Todolist(null, "Tarefa 1", "Descricao", TodoStatus.PENDENTE, null, null);
 
@@ -101,7 +144,7 @@ public class TodolistControllerIntegrationTest {
     }
 
     @Test
-    void shouldUpdateTodoListAndReturnAcceptedStatus() throws Exception {
+    void shouldUpdateTaskAndReturnAcceptedStatus() throws Exception {
         Todolist newTask = new Todolist(null, "Tarefa 1", "Descricao", TodoStatus.PENDENTE, null, null);
         Todolist savedTask = todolistRepository.save(newTask);
 
@@ -134,7 +177,7 @@ public class TodolistControllerIntegrationTest {
     }
 
     @Test
-    void shouldDeleteTodolist() throws Exception {
+    void shouldDeleteTask() throws Exception {
 
         Todolist newTask = new Todolist(null, "Tarefa 1", "Descricao", TodoStatus.PENDENTE, null, null);
 

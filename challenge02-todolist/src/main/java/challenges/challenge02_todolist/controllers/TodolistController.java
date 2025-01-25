@@ -5,10 +5,7 @@ import challenges.challenge02_todolist.models.Todolist;
 import challenges.challenge02_todolist.models.enums.TodoStatus;
 import challenges.challenge02_todolist.services.TodolistService;
 import jakarta.validation.Valid;
-import org.apache.coyote.Response;
-import org.hibernate.query.SortDirection;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -18,8 +15,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
-
-import javax.swing.text.html.parser.Entity;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
@@ -38,7 +33,7 @@ public class TodolistController {
             @RequestParam(value = "size", defaultValue = "5") Integer size,
             @RequestParam(value = "direction", defaultValue = "asc") String direction
     ) {
-        var sortDirection = "desc".equalsIgnoreCase(direction) ? Sort.Direction.DESC: Sort.Direction.ASC;
+        var sortDirection = "desc".equalsIgnoreCase(direction) ? Sort.Direction.DESC : Sort.Direction.ASC;
         Pageable pageable = PageRequest.of(page, size, Sort.by(sortDirection, "id"));
         return ResponseEntity.ok(service.findAll(pageable));
 
@@ -53,10 +48,10 @@ public class TodolistController {
             @RequestParam(value = "direction", defaultValue = "asc") String direction
 
     ) {
-        var sortDirection = "desc".equalsIgnoreCase(direction) ? Sort.Direction.DESC: Sort.Direction.ASC;
+        var sortDirection = "desc".equalsIgnoreCase(direction) ? Sort.Direction.DESC : Sort.Direction.ASC;
         Pageable pageable = PageRequest.of(page, size, Sort.by(sortDirection, "id"));
 
-        return ResponseEntity.ok(service.findByTitle(title,pageable));
+        return ResponseEntity.ok(service.findByTitle(title, pageable));
     }
 
     @GetMapping("/status")
@@ -66,10 +61,10 @@ public class TodolistController {
             @RequestParam(value = "size", defaultValue = "5") Integer size,
             @RequestParam(value = "direction", defaultValue = "asc") String direction
     ) {
-        var sortDirection = "desc".equalsIgnoreCase(direction) ? Sort.Direction.DESC: Sort.Direction.ASC;
+        var sortDirection = "desc".equalsIgnoreCase(direction) ? Sort.Direction.DESC : Sort.Direction.ASC;
         Pageable pageable = PageRequest.of(page, size, Sort.by(sortDirection, "id"));
 
-        return ResponseEntity.ok(service.findByStatus(status,pageable));
+        return ResponseEntity.ok(service.findByStatus(status, pageable));
     }
 
 
