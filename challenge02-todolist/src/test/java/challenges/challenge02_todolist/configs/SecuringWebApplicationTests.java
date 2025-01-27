@@ -27,7 +27,7 @@ public class SecuringWebApplicationTests {
 	public void loginWithValidUserThenAuthenticated() throws Exception {
 		FormLoginRequestBuilder login = formLogin()
 			.user("user")
-			.password("password");
+			.password("1");
 
 		mockMvc.perform(login)
 			.andExpect(authenticated().withUsername("user"));
@@ -43,11 +43,6 @@ public class SecuringWebApplicationTests {
 			.andExpect(unauthenticated());
 	}
 
-	@Test
-	public void accessUnsecuredResourceThenOk() throws Exception {
-		mockMvc.perform(get("/"))
-			.andExpect(status().isOk());
-	}
 
 	@Test
 	public void accessSecuredResourceUnauthenticatedThenRedirectsToLogin() throws Exception {

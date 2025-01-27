@@ -21,7 +21,8 @@ public class WebSecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests((requests) -> requests
-                        .requestMatchers("/login", "/hello").permitAll()
+                        .requestMatchers("/login").permitAll()
+                        .requestMatchers("/tarefas/**").hasRole("USER")
                         .anyRequest().authenticated()
                 )
                 .formLogin((form) -> form

@@ -13,6 +13,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestBuilders;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -22,12 +24,14 @@ import java.util.List;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestBuilders.formLogin;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 
 @WebMvcTest(TodolistController.class)
+@WithMockUser(username = "user", password = "1", roles = {"USER"})
 public class TodolistControllerTest {
 
     @Autowired
@@ -124,6 +128,7 @@ public class TodolistControllerTest {
                 .andExpect(jsonPath("$.description").value("Descricao da tarefa 1"));
     }
 
+
     @Test
     void shouldInsertTask() throws Exception {
         Todolist task = createTestTask(1L);
@@ -145,7 +150,7 @@ public class TodolistControllerTest {
                 .andExpect(jsonPath("$.description").value("Descricao da tarefa 1"))
                 .andExpect(jsonPath("$.status").value("PENDENTE"));
 
-        // Verifica se o método insert foi chamado corretamente no mock
+        // Verifica se o metodo insert foi chamado corretamente no mock
         verify(service, times(1)).insert(any(Todolist.class));
     }
 
