@@ -14,4 +14,9 @@ public class HomeController {
         model.addAttribute("username", user.getUsername());
         return "hello";
     }
+
+    @GetMapping("/login")
+    public String login() {
+        return "login";
+    }
 }
