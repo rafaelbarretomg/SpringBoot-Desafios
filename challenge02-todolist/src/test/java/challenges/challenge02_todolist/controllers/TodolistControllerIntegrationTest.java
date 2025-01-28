@@ -10,15 +10,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@WithMockUser(username = "user", password = "1", roles = {"USER"})
 public class TodolistControllerIntegrationTest {
 
     @Autowired
@@ -129,6 +132,7 @@ public class TodolistControllerIntegrationTest {
         //Enviando a requisicao POST
         mockMvc.perform(
                         post("/tarefas")
+                                .with(csrf())
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(newTask))) // Converte o objeto para JSON
                 .andExpect(status().isCreated()) // verifica se o status da resposta eh 201
@@ -151,6 +155,7 @@ public class TodolistControllerIntegrationTest {
         //Requisicao UPDATE
         mockMvc.perform(
                         put("/tarefas/{id}", savedTask.getId())
+                                .with(csrf())
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(
                                         """
@@ -185,6 +190,7 @@ public class TodolistControllerIntegrationTest {
 
         //Requisicao DELETE
         mockMvc.perform(delete("/tarefas/{id}", savedTask.getId())
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNoContent());
 

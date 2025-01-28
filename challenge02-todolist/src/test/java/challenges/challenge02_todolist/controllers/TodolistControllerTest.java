@@ -17,6 +17,8 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestBuilders;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MockMvcBuilder;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -25,6 +27,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestBuilders.formLogin;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -42,8 +46,7 @@ public class TodolistControllerTest {
 
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.openMocks(this);
-    }
+        MockitoAnnotations.openMocks(this);}
 
     private Todolist createTestTask(Long id) {
         return new Todolist(
@@ -136,6 +139,7 @@ public class TodolistControllerTest {
         when(service.insert(any(Todolist.class))).thenReturn(task);
 
         mockMvc.perform(post("/tarefas")
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {
@@ -162,6 +166,7 @@ public class TodolistControllerTest {
         when(service.update(anyLong(), any(Todolist.class))).thenReturn(task);
 
         mockMvc.perform(put("/tarefas/{id}", 1)
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(
                                 """
@@ -183,7 +188,7 @@ public class TodolistControllerTest {
     void shouldDeleteTask() throws Exception {
         Mockito.doNothing().when(service).delete(anyLong());
 
-        mockMvc.perform(delete("/tarefas/{id}", 1))
+        mockMvc.perform(delete("/tarefas/{id}", 1) .with(csrf()))
                 .andExpect(status().isNoContent());
     }
 
